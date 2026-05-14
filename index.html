@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AngryAI</title>
+    <script src="https://js.puter.com/v2/"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        body {
+            margin: 0;
+            background: linear-gradient(180deg, #330000, #000000);
+            color: #ffdddd;
+            font-family: 'Press Start 2P', cursive;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        header {
+            background: #8b0000;
+            border-bottom: 5px solid #ff2d00;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 0 25px #ff0000;
+        }
+        
+        h1 {
+            color: #ff5555;
+            text-shadow: 0 0 15px #ff0000;
+            animation: angry 0.6s infinite alternate;
+        }
+        
+        @keyframes angry { from {transform: translateX(-4px) rotate(-3deg);} to {transform: translateX(4px) rotate(3deg);} }
+        
+        #chat {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: rgba(0,0,0,0.9);
+            margin: 10px;
+            border: 3px solid #550000;
+            border-radius: 8px;
+        }
+        
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .bubble {
+            max-width: 80%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #ff2d00;
+            background: #220000;
+            color: #ffbbbb;
+        }
+        
+        .user .bubble {
+            background: #ff8800;
+            color: black;
+            border-color: #ffdd00;
+            align-self: flex-end;
+        }
+        
+        pre {
+            background: #111;
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+        
+        .input-area {
+            padding: 15px;
+            background: #1a0000;
+            border-top: 4px solid #ff2d00;
+            display: flex;
+            gap: 10px;
+        }
+        
+        #user-input {
+            flex: 1;
+            padding: 15px;
+            background: #000;
+            border: 3px solid #ff0000;
+            color: white;
+        }
+        
+        button {
+            padding: 15px 30px;
+            background: #8b0000;
+            color: white;
+            border: 3px solid #ff0000;
+            cursor: pointer;
+        }
+        
+        button:hover { background: #ff0000; }
+        
+        .typing { font-style: italic; color: #ff7777; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🔥 ANGRYAI 🔥</h1>
+        <p style="color:#ff7777;">Echte KI • Ich hasse dich trotzdem</p>
+    </header>
+    
+    <div id="chat"></div>
+    
+    <div class="input-area">
+        <input type="text" id="user-input" placeholder="Schmeiß mir Code, Fragen oder Müll rein..." autocomplete="off">
+        <button onclick="sendMessage()">SENDEN</button>
+    </div>
+
+    <script>
+        const chat = document.getElementById('chat');
+        const input = document.getElementById('user-input');
+
+        function addMessage(text, isUser) {
+            const div = document.createElement('div');
+            div.className = `message ${isUser ? 'user' : 'ai'}`;
+            
+            if (typeof text === 'string') {
+                div.innerHTML = `<div class="bubble">${text.replace(/\n/g, '<br>')}</div>`;
+            } else {
+                div.innerHTML = text;
+            }
+            
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+            if (!isUser) hljs.highlightAll();
+        }
+
+        function addTyping() {
+            const typing = document.createElement('div');
+            typing.id = 'typing';
+            typing.className = 'message ai';
+            typing.innerHTML = `<div class="bubble typing">grrr... ich denk nach du Noob...</div>`;
+            chat.appendChild(typing);
+            chat.scrollTop = chat.scrollHeight;
+            return typing;
+        }
+
+        async function sendMessage() {
+            const text = input.value.trim();
+            if (!text) return;
+
+            addMessage(text, true);
+            input.value = '';
+
+            const typing = addTyping();
+
+            try {
+                // Echte KI über Puter.js
+                const response = await puter.ai.chat(text, {
+                    model: "grok-4"          // oder "claude-3.5", "gemini-pro", "deepseek-r1" etc.
+                });
+
+                typing.remove();
+                addMessage(response, false);
+            } catch (err) {
+                typing.remove();
+                addMessage("❌ API-Fehler. Hast du Internet? Oder Puter.js blockiert?", false);
+                console.error(err);
+            }
+        }
+
+        // Enter-Taste
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        // Startnachricht
+        window.onload = () => {
+            setTimeout(() => {
+                addMessage("Na endlich... Jetzt bin ich echt. Schmeiß mir deinen schlechten Code rein, ich erklär ihn dir — und beleidige dich nebenbei.", false);
+            }, 800);
+        };
+    </script>
+</body>
+</html>
